@@ -15,7 +15,7 @@
     },
     "dependencies": {
         "drizzle-orm": "0.45.2",
-        "mariadb": "3.5.4",
+        "mysql2": "3.11.5",
         "redis": "5.11.0",
         "ws": "8.22.0"
     },
