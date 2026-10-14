@@ -5,7 +5,7 @@ export async function migrate(pool) {
     const conn = await pool.getConnection();
     try {
         const [lock] = await conn.query("SELECT GET_LOCK('speedway_schema_migrations',10) AS acquired");
-        if (lock.acquired !== 1) throw Error('Migration lock unavailable');
+        if (lock[0].acquired !== 1) throw Error('Migration lock unavailable');
         await conn.query('CREATE TABLE IF NOT EXISTS schema_migrations (name VARCHAR(100) PRIMARY KEY, applied_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)) ENGINE=InnoDB');
         const dir = new URL('./mariadb/',
             import.meta.url);
@@ -31,14 +31,18 @@ export function repository(pool) {
         async scores({ track, level, players }) {
             let sql = 'SELECT name,time_ms,level,players,track FROM race_scores WHERE rules=5 AND track=?',
                 args = [track];
-            if (level) { sql += ' AND level=?';
-                args.push(level) }
-            if (players) { sql += ' AND players=?';
-                args.push(players) }
+            if (level) {
+                sql += ' AND level=?';
+                args.push(level)
+            }
+            if (players) {
+                sql += ' AND players=?';
+                args.push(players)
+            }
             return pool.query(sql + ' ORDER BY time_ms,created_at LIMIT 20', args)
         },
         async saveScores(owner, entries) { await transaction(async c => { for (const s of entries) await c.query('INSERT IGNORE INTO race_scores (id,owner_id,name,time_ms,level,players,track,rules) VALUES (?,?,?,?,?,?,?,5)', [s.id, owner, s.name, s.time_ms, s.level, s.players, s.track]) }) },
-        async campaign(owner, id) { const rows = id ? await pool.query('SELECT state,revision FROM gp_campaigns WHERE owner_id=? AND id=?', [owner, id]) : await pool.query('SELECT state,revision FROM gp_campaigns WHERE owner_id=? ORDER BY updated_at DESC LIMIT 1', [owner]); return { campaign: rows.length ? JSON.parse(rows[0].state) : null, revision: rows[0]?.revision ?? 0 } },
+        async campaign(owner, id) { const rows = id ? await pool.query('SELECT state,revision FROM gp_campaigns WHERE owner_id=? AND id=?', [owner, id]) : await pool.query('SELECT state,revision FROM gp_campaigns WHERE owner_id=? ORDER BY updated_at DESC LIMIT 1', [owner]); return { campaign: rows.length ? JSON.parse(rows[0].state) : null, revision: rows[0] ? .revision ? ? 0 } },
         async saveCampaign(owner, state, revision) {
             const payload = JSON.stringify(state);
             return transaction(async c => {

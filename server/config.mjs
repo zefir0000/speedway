@@ -9,5 +9,28 @@ export function loadConfig(env = process.env) {
     if (!env.MYSQL_USER || !env.MYSQL_DATABASE) throw Error('Set MYSQL_USER and MYSQL_DATABASE');
     const redisPrefix = env.REDIS_PREFIX || 'speedway:';
     if (!/^[a-zA-Z0-9:_-]{1,60}$/.test(redisPrefix)) throw Error('Invalid REDIS_PREFIX');
-    return { host: env.HOST || '127.0.0.1', port: integer(env, 'PORT', 3000, 0, 65535), publicOrigin, sessionSecret: env.SESSION_SECRET, redisUrl: env.REDIS_URL || 'redis://127.0.0.1:6379', redisPrefix, queueWaitMs: 20000, disconnectGraceMs: 5000, snapshotHz: 20, checkpointMs: 1000, maxRooms: integer(env, 'MAX_ROOMS', 100, 1, 1000), maxConnections: integer(env, 'MAX_CONNECTIONS', 500, 4, 5000), mysql: { host: env.MYSQL_HOST || '127.0.0.1', port: integer(env, 'MYSQL_PORT', 3306, 1, 65535), user: env.MYSQL_USER, password: env.MYSQL_PASSWORD || '', database: env.MYSQL_DATABASE, connectionLimit: integer(env, 'MYSQL_POOL_SIZE', 5, 1, 20), connectTimeout: 3000, acquireTimeout: 3000, queryTimeout: 5000, timezone: 'Z', autoJsonMap: false, bigIntAsNumber: true, insertIdAsNumber: true, multipleStatements: false } };
+    return {
+        host: env.HOST || '127.0.0.1',
+        port: integer(env, 'PORT', 3000, 0, 65535),
+        publicOrigin,
+        sessionSecret: env.SESSION_SECRET,
+        redisUrl: env.REDIS_URL || 'redis://127.0.0.1:6379',
+        redisPrefix,
+        queueWaitMs: 20000,
+        disconnectGraceMs: 5000,
+        snapshotHz: 20,
+        checkpointMs: 1000,
+        maxRooms: integer(env, 'MAX_ROOMS', 100, 1, 1000),
+        maxConnections: integer(env, 'MAX_CONNECTIONS', 500, 4, 5000),
+        mysql: {
+            host: env.MYSQL_HOST || '127.0.0.1',
+            port: integer(env, 'MYSQL_PORT', 3306, 1, 65535),
+            user: env.MYSQL_USER,
+            password: env.MYSQL_PASSWORD || '',
+            database: env.MYSQL_DATABASE,
+            connectionLimit: integer(env, 'MYSQL_POOL_SIZE', 5, 1, 20),
+            connectTimeout: 3000,
+            timezone: 'Z'
+        }
+    };
 }
