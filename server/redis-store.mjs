@@ -60,7 +60,7 @@ export class RedisStore {
     async checkpoint(rooms) { if (!rooms.length) return; const tx = this.client.multi(); for (const r of rooms) tx.set(this.key('room:' + r.id), JSON.stringify(r), { EX: 900 });
         await tx.exec() }
     async enqueue(result) { await this.client.xAdd(this.key('results'), '*', { payload: JSON.stringify(result) }) }
-    async pendingResults() { const reclaimed = await this.client.xAutoClaim(this.key('results'), 'mysql', this.consumer, 1000, '0-0', { COUNT: 10 }); if (reclaimed.messages.length) return reclaimed.messages; let groups = await this.client.xReadGroup('mysql', this.consumer, { key: this.key('results'), id: '0' }, { COUNT: 10 }); if (groups ? .[0] ? .messages.length) return groups[0].messages;
+    async pendingResults() { const reclaimed = await this.client.xAutoClaim(this.key('results'), 'mysql', this.consumer, 1000, '0-0', { COUNT: 10 }); if (reclaimed.messages.length) return reclaimed.messages; let groups = await this.client.xReadGroup('mysql', this.consumer, { key: this.key('results'), id: '0' }, { COUNT: 10 }); if (groups?.[0]?.messages.length) return groups[0].messages;
         groups = await this.client.xReadGroup('mysql', this.consumer, { key: this.key('results'), id: '>' }, { COUNT: 10 }); return groups?.[0]?.messages ?? [] }
     async acknowledge(id) { await this.client.multi().xAck(this.key('results'), 'mysql', id).xDel(this.key('results'), id).exec() }
 }
