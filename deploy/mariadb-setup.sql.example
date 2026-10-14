@@ -1,0 +1,4 @@
+-- Run with a database administrator. Replace the example password before use.
+CREATE DATABASE IF NOT EXISTS speedway CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS 'speedway'@'127.0.0.1' IDENTIFIED BY 'REPLACE_WITH_A_PRIVATE_PASSWORD';
+GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, REFERENCES ON speedway.* TO 'speedway'@'127.0.0.1';

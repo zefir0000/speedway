@@ -1,0 +1,7 @@
+import {DatabaseSync} from 'node:sqlite';
+import {readdirSync,readFileSync,mkdirSync} from 'node:fs';
+import {dirname,join} from 'node:path';
+export function openDatabase(path,migrations){if(path!==':memory:')mkdirSync(dirname(path),{recursive:true});const sqlite=new DatabaseSync(path);sqlite.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;');sqlite.exec('CREATE TABLE IF NOT EXISTS _speedway_migrations (name TEXT PRIMARY KEY)');
+for(const file of readdirSync(migrations).filter(f=>f.endsWith('.sql')).sort()){if(sqlite.prepare('SELECT name FROM _speedway_migrations WHERE name = ?').get(file))continue;sqlite.exec('BEGIN IMMEDIATE');try{sqlite.exec(readFileSync(join(migrations,file),'utf8'));sqlite.prepare('INSERT INTO _speedway_migrations (name) VALUES (?)').run(file);sqlite.exec('COMMIT')}catch(error){sqlite.exec('ROLLBACK');throw error}}
+function statement(sql,args=[]){const query=sqlite.prepare(sql),run=()=>{const result=query.run(...args);return {meta:{changes:Number(result.changes)}}};return {bind:(...values)=>statement(sql,values),first:async()=>query.get(...args)||null,all:async()=>({results:query.all(...args)}),run:async()=>run(),_run:run}}
+return {prepare:sql=>statement(sql),batch:async statements=>{sqlite.exec('BEGIN IMMEDIATE');try{const results=statements.map(s=>s._run());sqlite.exec('COMMIT');return results}catch(error){sqlite.exec('ROLLBACK');throw error}},close:()=>sqlite.close()};}

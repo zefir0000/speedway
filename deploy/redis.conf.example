@@ -1,0 +1,7 @@
+# Merge into the configuration of a Redis instance dedicated to Speedway.
+bind 127.0.0.1
+protected-mode yes
+appendonly yes
+appendfsync everysec
+maxmemory-policy noeviction
+# Configure a password/ACL and set matching REDIS_URL in .env if Redis is remote.
