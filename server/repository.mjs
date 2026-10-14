@@ -52,8 +52,8 @@ export function repository(pool) {
                 const row = rows[0];
                 console.log('[saveCampaign] Row:', row ? 'found' : 'not found');
                 if (row && row.owner_id !== owner) throw Object.assign(Error('Nie znaleziono Twojej kampanii.'), { status: 404 });
-                if (row ? .state === payload) return row.revision;
-                if ((row ? .revision ? ? 0) !== revision) throw Object.assign(Error('Zapis kampanii został zmieniony. Wczytaj aktualny sezon.'), { status: 409 });
+                if (row?.state === payload) return row.revision;
+                if ((row?.revision ?? 0) !== revision) throw Object.assign(Error('Zapis kampanii został zmieniony. Wczytaj aktualny sezon.'), { status: 409 });
                 const next = revision + 1;
                 console.log('[saveCampaign] Saving with revision:', next);
                 if (row) await c.query('UPDATE gp_campaigns SET state=?,revision=?,updated_at=CURRENT_TIMESTAMP(3) WHERE id=? AND owner_id=?', [payload, next, state.id, owner]);
