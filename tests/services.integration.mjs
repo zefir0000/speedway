@@ -15,29 +15,75 @@ const root = new URL('../',
 const delay = ms => new Promise(r => setTimeout(r, ms)),
     settle = () => new Promise(r => setImmediate(r));
 
-function element() { const classes = new Set(),
-        children = new Map(); return { children: [], dataset: {}, style: { setProperty() {} }, classList: { add(...xs) { xs.forEach(x => classes.add(x)) }, remove(...xs) { xs.forEach(x => classes.delete(x)) }, contains: x => classes.has(x), toggle(x, v) { if (v === undefined) v = !classes.has(x);
-                v ? classes.add(x) : classes.delete(x); return v } }, setAttribute() {}, addEventListener() {}, append(...xs) { this.children.push(...xs) }, replaceChildren(...xs) { this.children = xs }, querySelector: s => children.get(s) || (children.set(s, element()), children.get(s)), getBoundingClientRect: () => ({ width: 844, height: 390 }), getContext: () => new Proxy({}, { get: () => () => {} }) } }
+function element() {
+    const classes = new Set(),
+        children = new Map();
+    return {
+        children: [],
+        dataset: {},
+        style: { setProperty() {} },
+        classList: {
+            add(...xs) { xs.forEach(x => classes.add(x)) },
+            remove(...xs) { xs.forEach(x => classes.delete(x)) },
+            contains: x => classes.has(x),
+            toggle(x, v) {
+                if (v === undefined) v = !classes.has(x);
+                v ? classes.add(x) : classes.delete(x);
+                return v
+            }
+        },
+        setAttribute() {},
+        addEventListener() {},
+        append(...xs) { this.children.push(...xs) },
+        replaceChildren(...xs) { this.children = xs },
+        querySelector: s => children.get(s) || (children.set(s, element()), children.get(s)),
+        getBoundingClientRect: () => ({ width: 844, height: 390 }),
+        getContext: () => new Proxy({}, { get: () => () => {} })
+    }
+}
 async function peer(origin, cookie, ticket = crypto.randomUUID() + '-' + crypto.randomUUID()) {
     const socket = new WebSocket(origin.replace('http:', 'ws:') + '/ws', { headers: { origin, cookie } }),
         messages = [],
         pending = new Map();
     let seq = 0;
-    socket.on('message', raw => { const m = JSON.parse(raw);
-        messages.push(m); if (m.id && pending.has(m.id)) { const p = pending.get(m.id);
+    socket.on('message', raw => {
+        const m = JSON.parse(raw);
+        messages.push(m);
+        if (m.id && pending.has(m.id)) {
+            const p = pending.get(m.id);
             pending.delete(m.id);
             clearTimeout(p.timer);
-            m.type === 'error' ? p.reject(Object.assign(Error(m.error), { status: m.status })) : p.resolve(m.data) } });
-    await new Promise((resolve, reject) => { socket.once('open', resolve);
-        socket.once('error', reject) });
+            m.type === 'error' ? p.reject(Object.assign(Error(m.error), { status: m.status })) : p.resolve(m.data)
+        }
+    });
+    await new Promise((resolve, reject) => {
+        socket.once('open', resolve);
+        socket.once('error', reject)
+    });
     socket.send(JSON.stringify({ type: 'hello', ticket }));
-    const wait = async predicate => { for (let n = 0; n < 300; n++) { const found = messages.find(predicate); if (found) return found;
-            await delay(5) } throw Error('WebSocket message timeout') };
+    const wait = async predicate => {
+        for (let n = 0; n < 300; n++) {
+            const found = messages.find(predicate);
+            if (found) return found;
+            await delay(5)
+        }
+        throw Error('WebSocket message timeout')
+    };
     await wait(m => m.type === 'welcome');
-    return { socket, ticket, messages, wait, request(route, body) { return new Promise((resolve, reject) => { const id = ++seq,
+    return {
+        socket,
+        ticket,
+        messages,
+        wait,
+        request(route, body) {
+            return new Promise((resolve, reject) => {
+                const id = ++seq,
                     timer = setTimeout(() => reject(Error('RPC timeout')), 2000);
                 pending.set(id, { resolve, reject, timer });
-                socket.send(JSON.stringify({ type: 'request', id, route, body })) }) } };
+                socket.send(JSON.stringify({ type: 'request', id, route, body }))
+            })
+        }
+    };
 }
 
 test('real Redis + MySQL + WebSocket + browser client races', { skip: process.env.INTEGRATION !== '1', timeout: 60000 }, async() => {
@@ -60,8 +106,11 @@ test('real Redis + MySQL + WebSocket + browser client races', { skip: process.en
         const address = await app.listen();
         config.publicOrigin = `http://127.0.0.1:${address.port}`;
         const origin = config.publicOrigin;
-        const getCookie = async() => { const response = await fetch(origin + '/');
-            assert.ok((await response.text()).includes('online-ws-ui.js')); return response.headers.get('set-cookie').split(';')[0] };
+        const getCookie = async() => {
+            const response = await fetch(origin + '/');
+            assert.ok((await response.text()).includes('online-ws-ui.js'));
+            return response.headers.get('set-cookie').split(';')[0]
+        };
         const cookies = await Promise.all(Array.from({ length: 4 }, getCookie));
         class Clock extends Date { static now() { return now } }
         for (let i = 0; i < 4; i++) {
@@ -70,8 +119,12 @@ test('real Redis + MySQL + WebSocket + browser client races', { skip: process.en
                 cookie = cookies[i],
                 storage = new Map(),
                 connections = [];
-            class BrowserSocket extends WebSocket { constructor(url) { super(url, { headers: { origin, cookie } });
-                    connections.push(this) } }
+            class BrowserSocket extends WebSocket {
+                constructor(url) {
+                    super(url, { headers: { origin, cookie } });
+                    connections.push(this)
+                }
+            }
             const c = { Date: Clock, crypto: crypto.webcrypto, console, AbortController, WebSocket: BrowserSocket, location: { protocol: 'http:', host: `127.0.0.1:${address.port}` }, document: { body: element(), getElementById: id => nodes[id] || (nodes[id] = element()), querySelectorAll: s => s === '[data-rider]' ? controls : [], createElement: element, createElementNS: element, addEventListener() {} }, window: { devicePixelRatio: 2, addEventListener() {} }, navigator: {}, localStorage: { getItem: () => null, setItem() {}, removeItem() {} }, sessionStorage: { getItem: k => storage.get(k) || null, setItem: (k, v) => storage.set(k, v), removeItem: k => storage.delete(k) }, ResizeObserver: class { observe() {} }, requestAnimationFrame() {}, setTimeout, clearTimeout, setInterval, clearInterval, fetch: (url, options = {}) => fetch(origin + url, {...options, headers: {...options.headers, cookie, origin } }) };
             vm.createContext(c);
             for (const file of['tracks.js', 'gp-engine.js', 'gp-ui.js', 'online-race.js', 'online-ws-ui.js', 'game.js']) vm.runInContext(read('web/' + file), c);
@@ -101,8 +154,11 @@ test('real Redis + MySQL + WebSocket + browser client races', { skip: process.en
             if (frame % 3 === 0) app.realtime.broadcast();
             await settle();
             await settle();
-            clients.forEach((cl, i) => { vm.runInContext('OnlineUI.tick(1/60)', cl.c);
-                controllers[i](); if (vm.runInContext("state==='finishing'&&racers[0].finish===null&&!racers[0].eliminated", cl.c) && !cl.controls[0].disabled) trailingControls = true });
+            clients.forEach((cl, i) => {
+                vm.runInContext('OnlineUI.tick(1/60)', cl.c);
+                controllers[i]();
+                if (vm.runInContext("state==='finishing'&&racers[0].finish===null&&!racers[0].eliminated", cl.c) && !cl.controls[0].disabled) trailingControls = true
+            });
         }
         assert.equal(room.world.phase, 'result', 'Four real human controllers must finish');
         assert.equal(room.world.reason, 'finished');
@@ -144,11 +200,14 @@ test('real Redis + MySQL + WebSocket + browser client races', { skip: process.en
         await solo.request('queue', { action: 'join', name: 'Solo' });
         await app.realtime.matchmaking();
         assert.equal(app.realtime.rooms.size, 1);
-        for (let second = 0; second < 21; second++) { now += 1000;
+        for (let second = 0; second < 21; second++) {
+            now += 1000;
             solo.socket.send(JSON.stringify({ type: 'ping', clientAt: now }));
             await settle();
             await settle();
-            await app.realtime.matchmaking(); if (solo.messages.some(m => m.type === 'matched')) break }
+            await app.realtime.matchmaking();
+            if (solo.messages.some(m => m.type === 'matched')) break
+        }
         const matched = await solo.wait(m => m.type === 'matched');
         let state = await solo.request('match', { matchId: matched.matchId });
         assert.equal(state.world.racers.filter(r => r.isBot).length, 3);
@@ -159,11 +218,14 @@ test('real Redis + MySQL + WebSocket + browser client races', { skip: process.en
         await delay(20);
         const returning = await peer(origin, cookies[0]);
         await returning.request('queue', { action: 'join', name: 'Rejoin' });
-        for (let second = 0; second < 21; second++) { now += 1000;
+        for (let second = 0; second < 21; second++) {
+            now += 1000;
             returning.socket.send(JSON.stringify({ type: 'ping', clientAt: now }));
             await settle();
             await settle();
-            await app.realtime.matchmaking(); if (returning.messages.some(m => m.type === 'matched')) break }
+            await app.realtime.matchmaking();
+            if (returning.messages.some(m => m.type === 'matched')) break
+        }
         const returnMatch = (await returning.wait(m => m.type === 'matched')).matchId;
         const returnState = await returning.request('match', { matchId: returnMatch });
         now += 5100;
@@ -196,11 +258,13 @@ test('real Redis + MySQL + WebSocket + browser client races', { skip: process.en
         await Promise.all(eight.map(p => p.client.request('queue', { action: 'join', name: p.name })));
         await app.realtime.matchmaking();
         const groups = new Map();
-        for (const p of eight) { const matched = await p.client.wait(m => m.type === 'matched'),
+        for (const p of eight) {
+            const matched = await p.client.wait(m => m.type === 'matched'),
                 state = await p.client.request('match', { matchId: matched.matchId });
             groups.set(matched.matchId, (groups.get(matched.matchId) || 0) + 1);
             assert.ok(state.world.racers.every(r => !r.isBot));
-            p.client.socket.close() }
+            p.client.socket.close()
+        }
         assert.deepEqual([...groups.values()].sort(), [4, 4]);
         const cancelled = await peer(origin, await getCookie());
         await cancelled.request('queue', { action: 'join', name: 'Cancel' });
@@ -238,7 +302,10 @@ test('real Redis + MySQL + WebSocket + browser client races', { skip: process.en
         app.realtime.tick();
         assert.equal(fatalCount, 1, 'Expired Redis ownership must trigger server restart');
         console.log('Four WS browser clients completed real laps, common podium, 20-second bot fill, false starts, MySQL ownership/idempotency, Redis outbox retry, single-owner fence and nonblocking SQL passed', raceMetrics);
-    } finally { clients.forEach(cl => vm.runInContext('OnlineUI.back()', cl.c)); if (app) await app.close();
+    } finally {
+        clients.forEach(cl => vm.runInContext('OnlineUI.back()', cl.c));
+        if (app) await app.close();
         else redis.destroy();
-        await pool.end() }
+        await pool.end()
+    }
 });
