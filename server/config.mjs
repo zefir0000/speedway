@@ -1,4 +1,8 @@
-function integer(env, key, fallback, min, max) { const n = Number(env[key] ? ? fallback); if (!Number.isInteger(n) || n < min || n > max) throw Error(`Invalid ${key}`); return n }
+function integer(env, key, fallback, min, max) {
+    const n = Number(env[key] ?? fallback);
+    if (!Number.isInteger(n) || n < min || n > max) throw Error(`Invalid ${key}`);
+    return n
+}
 export function loadConfig(env = process.env) {
     const publicOrigin = new URL(env.PUBLIC_ORIGIN || 'http://localhost:3000').origin;
     if (!env.SESSION_SECRET || env.SESSION_SECRET.length < 32) throw Error('SESSION_SECRET must contain at least 32 characters');
