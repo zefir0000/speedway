@@ -45,15 +45,20 @@ export function repository(pool) {
         async campaign(owner, id) { const rows = id ? await pool.query('SELECT state,revision FROM gp_campaigns WHERE owner_id=? AND id=?', [owner, id]) : await pool.query('SELECT state,revision FROM gp_campaigns WHERE owner_id=? ORDER BY updated_at DESC LIMIT 1', [owner]); return { campaign: rows.length ? JSON.parse(rows[0].state) : null, revision: rows[0]?.revision ?? 0 } },
         async saveCampaign(owner, state, revision) {
             const payload = JSON.stringify(state);
+            console.log('[saveCampaign] Starting transaction for owner:', owner, 'id:', state.id, 'revision:', revision);
             return transaction(async c => {
+                console.log('[saveCampaign] Querying campaign for id:', state.id);
                 const rows = await c.query('SELECT owner_id,state,revision FROM gp_campaigns WHERE id=? FOR UPDATE', [state.id]);
                 const row = rows[0];
+                console.log('[saveCampaign] Row:', row ? 'found' : 'not found');
                 if (row && row.owner_id !== owner) throw Object.assign(Error('Nie znaleziono Twojej kampanii.'), { status: 404 });
-                if (row?.state === payload) return row.revision;
-                if ((row?.revision ?? 0) !== revision) throw Object.assign(Error('Zapis kampanii został zmieniony. Wczytaj aktualny sezon.'), { status: 409 });
+                if (row ? .state === payload) return row.revision;
+                if ((row ? .revision ? ? 0) !== revision) throw Object.assign(Error('Zapis kampanii został zmieniony. Wczytaj aktualny sezon.'), { status: 409 });
                 const next = revision + 1;
+                console.log('[saveCampaign] Saving with revision:', next);
                 if (row) await c.query('UPDATE gp_campaigns SET state=?,revision=?,updated_at=CURRENT_TIMESTAMP(3) WHERE id=? AND owner_id=?', [payload, next, state.id, owner]);
                 else await c.query('INSERT INTO gp_campaigns (id,owner_id,state,revision) VALUES (?,?,?,?)', [state.id, owner, payload, next]);
+                console.log('[saveCampaign] Saved successfully');
                 return next;
             })
         },
