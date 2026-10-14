@@ -37,7 +37,7 @@ export class RedisStore {
                     r.seen = now;
                     tx.hSet(this.key('waiting-meta'), hashes[i], JSON.stringify(r)) } });
             await tx.exec() }) }
-    async status() { const cohort = await this.client.zRangeWithScores(this.key('waiting'), 0, 3); const records = cohort.length ? await this.client.hmGet(this.key('waiting-meta'), cohort.map(p => p.value)) : []; return { state: 'waiting', players: records.filter(Boolean).map(raw => ({ name: JSON.parse(raw).name })), deadline: (cohort[0] ? .score ? ? Date.now()) + 20000 } }
+    async status() { const cohort = await this.client.zRangeWithScores(this.key('waiting'), 0, 3); const records = cohort.length ? await this.client.hmGet(this.key('waiting-meta'), cohort.map(p => p.value)) : []; return { state: 'waiting', players: records.filter(Boolean).map(raw => ({ name: JSON.parse(raw).name })), deadline: (cohort[0]?.score ?? Date.now()) + 20000 } }
     async take(now, build) {
         return this.serialized(async() => {
             const hashes = await this.client.zRange(this.key('waiting'), 0, -1),
@@ -61,6 +61,6 @@ export class RedisStore {
         await tx.exec() }
     async enqueue(result) { await this.client.xAdd(this.key('results'), '*', { payload: JSON.stringify(result) }) }
     async pendingResults() { const reclaimed = await this.client.xAutoClaim(this.key('results'), 'mysql', this.consumer, 1000, '0-0', { COUNT: 10 }); if (reclaimed.messages.length) return reclaimed.messages; let groups = await this.client.xReadGroup('mysql', this.consumer, { key: this.key('results'), id: '0' }, { COUNT: 10 }); if (groups ? .[0] ? .messages.length) return groups[0].messages;
-        groups = await this.client.xReadGroup('mysql', this.consumer, { key: this.key('results'), id: '>' }, { COUNT: 10 }); return groups ? .[0] ? .messages ? ? [] }
+        groups = await this.client.xReadGroup('mysql', this.consumer, { key: this.key('results'), id: '>' }, { COUNT: 10 }); return groups?.[0]?.messages ?? [] }
     async acknowledge(id) { await this.client.multi().xAck(this.key('results'), 'mysql', id).xDel(this.key('results'), id).exec() }
 }
