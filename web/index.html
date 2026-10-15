@@ -1,22 +1,228 @@
 <!doctype html>
-<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101917"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="description" content="Żużel dla 1–4 graczy na jednym ekranie. Cztery okrążenia, start na światło i walka o najlepszy czas."><title>Speedway</title><link rel="stylesheet" href="style.css?v=17"></head>
-<body><div id="safe-insets" aria-hidden="true"></div><main class="app"><header><a class="brand" href="./" aria-label="Speedway"><svg class="speedway-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104 88" aria-hidden="true" color="#f1ce63">
-<path d="M22 7H88L99 19 86 73 58 85 8 71 3 52 14 19Z" fill="#1b2920" stroke="#526045" stroke-width="1.5"/>
-<path d="m14 27 19-5M9 35l21-5M6 44l19-5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".65"/>
-<path d="M10 72c13-1 31-5 43-13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-<path d="m12 65 8-2m-5-5 6-2m-6 21 10-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".5"/>
-<g fill="#132018" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="55" r="15" stroke-width="5"/><circle cx="76" cy="52" r="11.5" stroke-width="4.5"/><path d="M32 55 44 42 60 46M76 52 68 29h-8" fill="none" stroke-width="4"/><path d="m29 41 15-5" fill="none" stroke-width="4"/></g>
-<path d="m41 29 10-3 16 9-5 7-14-8-6 9-10-3Z" fill="currentColor"/>
-<path d="m43 40 10 5 8 12-8 3-10-12-11 2-3-5Z" fill="currentColor"/>
-<path d="m63 35 11 1 4-3" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
-<path d="M45 23c-1-9 5-14 12-13 6 1 9 5 11 10l-12 6-11-3Z" fill="currentColor"/>
-<path d="m53 18 13 1-7 4-6-2Z" fill="#132018"/>
-<path d="m86 16 6 4-3 10" fill="none" stroke="currentColor" stroke-width="2" opacity=".55"/>
-</svg><span class="speedway-wordmark">SPEEDWAY</span></a><div class="tools"><button id="sound" aria-label="Włącz dźwięk" aria-pressed="false">♫</button><button id="pause" aria-label="Pauza" disabled>Ⅱ</button><button id="fullscreen" aria-label="Pełny ekran">⛶</button></div></header>
-<section class="hud" aria-label="Statystyki wyścigu"><div><small>OKRĄŻENIE G1</small><strong id="lap">— <em>/ 4</em></strong></div><div><small>POZYCJA G1</small><strong id="place">— <em>/ 4</em></strong></div><div><small id="time-label">CZAS</small><strong id="time">00:00.0</strong></div></section>
-<section class="track-wrap"><canvas id="track" aria-label="Tor żużlowy z dwiema prostymi. Kolor przycisku odpowiada motocyklowi."></canvas><div class="track-label" id="track-label">SPEEDWAY <span>KORONA</span></div><div class="signal hidden" id="signal" aria-live="polite"><span class="red-lamp" id="red-lamp"></span><strong id="signal-text">CZEKAJ</strong></div><div id="race-ceremony" class="race-ceremony hidden" aria-live="polite"><svg id="ceremony-flag" class="checkered-flag hidden" viewBox="0 0 64 54" aria-hidden="true"><defs><pattern id="checks" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="#f4f3e8"/><path d="M0 0h6v6H0zm6 6h6v6H6z" fill="#101917"/></pattern></defs><path d="M9 50V8" stroke="#d9decf" stroke-width="3" stroke-linecap="round"/><path d="M11 8c15-8 30 6 46-2v31c-16 8-31-6-46 2Z" fill="url(#checks)" stroke="#d9decf" stroke-width="1"/></svg><strong id="ceremony-title"></strong><span id="ceremony-time"></span></div><div id="countdown" aria-live="polite"></div>
-<div class="overlay" id="menu"><div class="eyebrow">CZTERY OKRĄŻENIA. JEDEN ZWYCIĘZCA.</div><h1>Liczy się<br><span>każdy łuk.</span></h1><div class="levels game-modes" aria-label="Tryb rozgrywki"><button data-mode="quick" class="selected" aria-pressed="true">Szybki bieg</button><button data-mode="gp" aria-pressed="false">Grand Prix</button><button data-mode="online" aria-pressed="false">Graj online</button></div><div class="setup-label quick-only">Ilu Was jedzie?</div><div class="levels players quick-only" aria-label="Liczba graczy"><button data-players="1" class="selected" aria-pressed="true">1</button><button data-players="2" aria-pressed="false">2</button><button data-players="3" aria-pressed="false">3</button><button data-players="4" aria-pressed="false">4</button></div><div id="name-fields" class="name-fields"></div><div class="setup-label quick-only">Wybierz arenę</div><div id="track-options" class="track-options quick-only" aria-label="Wybór toru"></div><p id="track-caption" class="track-caption quick-only"></p><div class="setup-label offline-only">Poziom trudności AI</div><div class="levels offline-only" aria-label="Poziom trudności AI"><button data-level="easy" class="selected" aria-pressed="true">Rozgrzewka</button><button data-level="normal" aria-pressed="false">Zawody</button><button data-level="hard" aria-pressed="false">Ekstraliga</button></div><section id="online-panel" class="online-panel hidden"><div class="eyebrow">GRAJ ONLINE</div><h2>Cztery miejsca. Jeden start.</h2><p>Wspólna kolejka dla wszystkich. Pełna czwórka rusza od razu; po 20 sekundach wolne miejsca zajmują boty. Tor losujemy dla całego biegu.</p><strong id="online-wait">Jedna kolejka. Cztery motocykle.</strong><ul id="online-players"></ul><p id="online-status" role="status">Wpisz imię i wyszukaj bieg.</p><button id="online-cancel" class="text-button hidden">Przerwij szukanie</button><small>Boty są oznaczone. Utrata połączenia oddaje motocykl botowi; możesz wrócić do biegu. Limit biegu online: 3 minuty.</small></section><section id="gp-panel" class="gp-panel hidden"><div class="eyebrow">GRAND PRIX</div><h2 id="gp-title">Pięć aren. Walka o tytuł.</h2><p id="gp-summary"></p><p id="gp-next"></p><p id="gp-save-state" role="status"></p><div class="gp-actions"><button id="gp-new" class="text-button hidden">Nowy sezon</button><button id="gp-load" class="text-button">Wczytaj zapis</button><button id="gp-retry" class="text-button hidden">Ponów zapis</button></div><div id="gp-tables" class="hidden"><details><summary>Punkty tej rundy</summary><div class="table-scroll"><table><thead><tr><th>#</th><th>Zawodnik</th><th>Pkt</th></tr></thead><tbody id="gp-meeting-body"></tbody></table></div></details><details><summary>Klasyfikacja sezonu</summary><div class="table-scroll"><table><thead><tr><th>#</th><th>Zawodnik</th><th>GP</th></tr></thead><tbody id="gp-season-body"></tbody></table></div></details><details><summary>Rozegrane rundy</summary><div id="gp-round-history"></div></details></div><details class="gp-rules"><summary>Jak działa Grand Prix?</summary><p>16 zawodników, 20 biegów zasadniczych, po 4 okrążenia. Za miejsca w biegu zdobywasz 3, 2, 1 lub 0 punktów. TOP 2 awansuje do finału. Miejsca 3–10 jadą dwa biegi ostatniej szansy — awansują ich zwycięzcy.</p><p>Wynik finału daje 20, 18, 16 i 14 punktów GP. Dalsze miejsca dostają od 12 do 1 punktu. Te punkty sumują się w sezonie; remis o mistrzostwo rozstrzyga dogrywka.</p><p>Sezon gry: 5 rund na naszych torach i fikcyjni rywale. Jedziesz swoje biegi, pozostałe rozstrzyga komputer. Bez kwalifikacji czasowych i sprintów. Falstart wyklucza Cię z biegu, a nie z sezonu.</p><a href="https://fimspeedway.com/sgp/rules" target="_blank" rel="noopener">Zasady FIM Speedway GP</a></details></section><p class="start-instruction">Czekaj na zgaśnięcie światła, potem kliknij START.<br>Kolejne przytrzymanie skręca. Za wcześnie = falstart.</p><button class="primary" id="start">ODPAL BIEG</button><button class="text-button" id="open-records">Tablica rekordów</button><div class="best" id="best"></div></div>
-<div class="overlay hidden" id="result" aria-live="polite"><div class="eyebrow" id="result-label">META</div><div id="result-podium" class="result-podium hidden"><svg class="checkered-flag" viewBox="0 0 64 54" aria-hidden="true"><defs><pattern id="result-checks" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="#f4f3e8"/><path d="M0 0h6v6H0zm6 6h6v6H6z" fill="#101917"/></pattern></defs><path d="M9 50V8" stroke="#d9decf" stroke-width="3" stroke-linecap="round"/><path d="M11 8c15-8 30 6 46-2v31c-16 8-31-6-46 2Z" fill="url(#result-checks)" stroke="#d9decf" stroke-width="1"/></svg><strong id="podium-name"></strong><span id="podium-time"></span></div><h1 id="result-title"></h1><p id="result-detail"></p><ol id="standings"></ol><p id="gp-result-message" class="hidden"></p><p class="save-status" id="save-status"></p><button class="text-button hidden" id="retry-save">Spróbuj zapisać ponownie</button><button class="primary" id="restart">JESZCZE JEDEN BIEG</button><div class="result-actions"><button class="text-button" id="back">Ustaw następny bieg</button><button class="text-button" id="result-records">Tablica rekordów</button></div></div>
-<div class="overlay hidden" id="pause-menu"><div class="eyebrow">CHWILA NA ODDECH</div><h1>Silnik stygnie.</h1><button class="primary" id="resume">WRACAMY NA TOR</button><button class="text-button" id="quit">Kończę ten bieg</button></div></section>
-<section class="controls"><p class="footnote">Prosta daje gaz, łuk wymaga wyczucia. Klawisze: G1 — spacja / ←, G2 — M, G3 — Q, G4 — P.</p></section><div class="corner-controls" id="corner-controls"><button class="race-control p1" data-rider="0"><strong>G1</strong><span>START</span><small>ŻÓŁTY</small></button><button class="race-control p2" data-rider="1"><strong>G2</strong><span>START</span><small>CZERWONY</small></button><button class="race-control p3" data-rider="2"><strong>G3</strong><span>START</span><small>NIEBIESKI</small></button><button class="race-control p4" data-rider="3"><strong>G4</strong><span>START</span><small>BIAŁY</small></button></div><div id="race-status" class="race-status" role="list" aria-label="Zawodnicy biegu w kolejności jazdy" aria-live="off"></div></main>
-<dialog id="records-dialog"><div class="records-head"><div><div class="eyebrow">NAJSZYBSI NA TORZE</div><h2>Tablica rekordów</h2></div><button id="close-records" aria-label="Zamknij tabelę">×</button></div><label class="records-filter">Tor <select id="records-track" aria-label="Tor w tabeli czasów"></select></label><p id="records-state">Sprawdzamy, kto rządzi na torze…</p><div class="table-scroll"><table><thead><tr><th>#</th><th>Zawodnik</th><th>Czas</th><th>Bieg</th></tr></thead><tbody id="records-body"></tbody></table></div><button class="text-button" id="reload-records">Odśwież wyniki</button></dialog><script src="tracks.js?v=17"></script><script src="gp-engine.js?v=17"></script><script src="gp-ui.js?v=17"></script><script src="online-race.js?v=17"></script><script src="online-ui.js?v=17"></script><script src="game.js?v=17"></script></body></html>
+<html lang="pl">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101917">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="description"
+    content="Żużel dla 1–4 graczy na jednym ekranie. Cztery okrążenia, start na światło i walka o najlepszy czas.">
+  <title>Speedway</title>
+  <link rel="stylesheet" href="style.css?v=17">
+</head>
+
+<body>
+  <div id="safe-insets" aria-hidden="true"></div>
+  <main class="app">
+    <header><a class="brand" href="./" aria-label="Speedway"><svg class="speedway-logo"
+          xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104 88" aria-hidden="true" color="#f1ce63">
+          <path d="M22 7H88L99 19 86 73 58 85 8 71 3 52 14 19Z" fill="#1b2920" stroke="#526045" stroke-width="1.5" />
+          <path d="m14 27 19-5M9 35l21-5M6 44l19-5" fill="none" stroke="currentColor" stroke-width="3"
+            stroke-linecap="round" opacity=".65" />
+          <path d="M10 72c13-1 31-5 43-13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+          <path d="m12 65 8-2m-5-5 6-2m-6 21 10-2" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" opacity=".5" />
+          <g fill="#132018" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="32" cy="55" r="15" stroke-width="5" />
+            <circle cx="76" cy="52" r="11.5" stroke-width="4.5" />
+            <path d="M32 55 44 42 60 46M76 52 68 29h-8" fill="none" stroke-width="4" />
+            <path d="m29 41 15-5" fill="none" stroke-width="4" />
+          </g>
+          <path d="m41 29 10-3 16 9-5 7-14-8-6 9-10-3Z" fill="currentColor" />
+          <path d="m43 40 10 5 8 12-8 3-10-12-11 2-3-5Z" fill="currentColor" />
+          <path d="m63 35 11 1 4-3" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+          <path d="M45 23c-1-9 5-14 12-13 6 1 9 5 11 10l-12 6-11-3Z" fill="currentColor" />
+          <path d="m53 18 13 1-7 4-6-2Z" fill="#132018" />
+          <path d="m86 16 6 4-3 10" fill="none" stroke="currentColor" stroke-width="2" opacity=".55" />
+        </svg><span class="speedway-wordmark">SPEEDWAY</span></a>
+      <div class="tools"><button id="sound" aria-label="Włącz dźwięk" aria-pressed="false">♫</button><button id="pause"
+          aria-label="Pauza" disabled>Ⅱ</button><button id="fullscreen" aria-label="Pełny ekran">⛶</button></div>
+    </header>
+    <section class="hud" aria-label="Statystyki wyścigu">
+      <div><small>OKRĄŻENIE G1</small><strong id="lap">— <em>/ 4</em></strong></div>
+      <div><small>POZYCJA G1</small><strong id="place">— <em>/ 4</em></strong></div>
+      <div><small id="time-label">CZAS</small><strong id="time">00:00.0</strong></div>
+    </section>
+    <section class="track-wrap"><canvas id="track"
+        aria-label="Tor żużlowy z dwiema prostymi. Kolor przycisku odpowiada motocyklowi."></canvas>
+      <div class="track-label" id="track-label">SPEEDWAY <span>KORONA</span></div>
+      <div class="signal hidden" id="signal" aria-live="polite"><span class="red-lamp" id="red-lamp"></span><strong
+          id="signal-text">CZEKAJ</strong></div>
+      <div id="race-ceremony" class="race-ceremony hidden" aria-live="polite"><svg id="ceremony-flag"
+          class="checkered-flag hidden" viewBox="0 0 64 54" aria-hidden="true">
+          <defs>
+            <pattern id="checks" width="12" height="12" patternUnits="userSpaceOnUse">
+              <rect width="12" height="12" fill="#f4f3e8" />
+              <path d="M0 0h6v6H0zm6 6h6v6H6z" fill="#101917" />
+            </pattern>
+          </defs>
+          <path d="M9 50V8" stroke="#d9decf" stroke-width="3" stroke-linecap="round" />
+          <path d="M11 8c15-8 30 6 46-2v31c-16 8-31-6-46 2Z" fill="url(#checks)" stroke="#d9decf" stroke-width="1" />
+        </svg><strong id="ceremony-title"></strong><span id="ceremony-time"></span></div>
+      <div id="countdown" aria-live="polite"></div>
+      <div class="overlay" id="menu">
+        <div class="eyebrow">CZTERY OKRĄŻENIA. JEDEN ZWYCIĘZCA.</div>
+        <h1>Liczy się<br><span>każdy łuk.</span></h1>
+        <div class="levels game-modes" aria-label="Tryb rozgrywki"><button data-mode="quick" class="selected"
+            aria-pressed="true">Szybki bieg</button><button data-mode="gp" aria-pressed="false">Grand
+            Prix</button><button data-mode="online" aria-pressed="false">Graj online</button></div>
+        <div class="setup-label quick-only">Ilu Was jedzie?</div>
+        <div class="levels players quick-only" aria-label="Liczba graczy"><button data-players="1" class="selected"
+            aria-pressed="true">1</button><button data-players="2" aria-pressed="false">2</button><button
+            data-players="3" aria-pressed="false">3</button><button data-players="4" aria-pressed="false">4</button>
+        </div>
+        <div id="name-fields" class="name-fields"></div>
+        <div class="setup-label quick-only">Wybierz arenę</div>
+        <div id="track-options" class="track-options quick-only" aria-label="Wybór toru"></div>
+        <p id="track-caption" class="track-caption quick-only"></p>
+        <div class="setup-label offline-only">Poziom trudności AI</div>
+        <div class="levels offline-only" aria-label="Poziom trudności AI"><button data-level="easy" class="selected"
+            aria-pressed="true">Rozgrzewka</button><button data-level="normal"
+            aria-pressed="false">Zawody</button><button data-level="hard" aria-pressed="false">Ekstraliga</button></div>
+        <section id="online-panel" class="online-panel hidden">
+          <div class="eyebrow">GRAJ ONLINE</div>
+          <h2>Cztery miejsca. Jeden start.</h2>
+          <p>Wspólna kolejka dla wszystkich. Pełna czwórka rusza od razu; po 20 sekundach wolne miejsca zajmują boty.
+            Tor losujemy dla całego biegu.</p><strong id="online-wait">Jedna kolejka. Cztery motocykle.</strong>
+          <ul id="online-players"></ul>
+          <p id="online-status" role="status">Wpisz imię i wyszukaj bieg.</p><button id="online-cancel"
+            class="text-button hidden">Przerwij szukanie</button><small>Boty są oznaczone. Utrata połączenia oddaje
+            motocykl botowi; możesz wrócić do biegu. Limit biegu online: 3 minuty.</small>
+        </section>
+        <section id="gp-panel" class="gp-panel hidden">
+          <div class="eyebrow">GRAND PRIX</div>
+          <h2 id="gp-title">Pięć aren. Walka o tytuł.</h2>
+          <p id="gp-summary"></p>
+          <p id="gp-next"></p>
+          <p id="gp-save-state" role="status"></p>
+          <div class="gp-actions"><button id="gp-new" class="text-button hidden">Nowy sezon</button><button id="gp-load"
+              class="text-button">Wczytaj zapis</button><button id="gp-retry" class="text-button hidden">Ponów
+              zapis</button></div>
+          <div id="gp-tables" class="hidden">
+            <details>
+              <summary>Punkty tej rundy</summary>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Zawodnik</th>
+                      <th>Pkt</th>
+                    </tr>
+                  </thead>
+                  <tbody id="gp-meeting-body"></tbody>
+                </table>
+              </div>
+            </details>
+            <details>
+              <summary>Klasyfikacja sezonu</summary>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Zawodnik</th>
+                      <th>GP</th>
+                    </tr>
+                  </thead>
+                  <tbody id="gp-season-body"></tbody>
+                </table>
+              </div>
+            </details>
+            <details>
+              <summary>Rozegrane rundy</summary>
+              <div id="gp-round-history"></div>
+            </details>
+          </div>
+          <details class="gp-rules">
+            <summary>Jak działa Grand Prix?</summary>
+            <p>16 zawodników, 20 biegów zasadniczych, po 4 okrążenia. Za miejsca w biegu zdobywasz 3, 2, 1 lub 0
+              punktów. TOP 2 awansuje do finału. Miejsca 3–10 jadą dwa biegi ostatniej szansy — awansują ich zwycięzcy.
+            </p>
+            <p>Wynik finału daje 20, 18, 16 i 14 punktów GP. Dalsze miejsca dostają od 12 do 1 punktu. Te punkty sumują
+              się w sezonie; remis o mistrzostwo rozstrzyga dogrywka.</p>
+            <p>Sezon gry: 5 rund na naszych torach i fikcyjni rywale. Jedziesz swoje biegi, pozostałe rozstrzyga
+              komputer. Bez kwalifikacji czasowych i sprintów. Falstart wyklucza Cię z biegu, a nie z sezonu.</p><a
+              href="https://fimspeedway.com/sgp/rules" target="_blank" rel="noopener">Zasady FIM Speedway GP</a>
+          </details>
+        </section>
+        <p class="start-instruction">Czekaj na zgaśnięcie światła, potem kliknij START.<br>Kolejne przytrzymanie skręca.
+          Za wcześnie = falstart.</p><button class="primary" id="start">ODPAL BIEG</button><button class="text-button"
+          id="open-records">Tablica rekordów</button>
+        <div class="best" id="best"></div>
+      </div>
+      <div class="overlay hidden" id="result" aria-live="polite">
+        <div class="eyebrow" id="result-label">META</div>
+        <div id="result-podium" class="result-podium hidden"><svg class="checkered-flag" viewBox="0 0 64 54"
+            aria-hidden="true">
+            <defs>
+              <pattern id="result-checks" width="12" height="12" patternUnits="userSpaceOnUse">
+                <rect width="12" height="12" fill="#f4f3e8" />
+                <path d="M0 0h6v6H0zm6 6h6v6H6z" fill="#101917" />
+              </pattern>
+            </defs>
+            <path d="M9 50V8" stroke="#d9decf" stroke-width="3" stroke-linecap="round" />
+            <path d="M11 8c15-8 30 6 46-2v31c-16 8-31-6-46 2Z" fill="url(#result-checks)" stroke="#d9decf"
+              stroke-width="1" />
+          </svg><strong id="podium-name"></strong><span id="podium-time"></span></div>
+        <h1 id="result-title"></h1>
+        <p id="result-detail"></p>
+        <ol id="standings"></ol>
+        <p id="gp-result-message" class="hidden"></p>
+        <p class="save-status" id="save-status"></p><button class="text-button hidden" id="retry-save">Spróbuj zapisać
+          ponownie</button><button class="primary" id="restart">JESZCZE JEDEN BIEG</button>
+        <div class="result-actions"><button class="text-button" id="back">Ustaw następny bieg</button><button
+            class="text-button" id="result-records">Tablica rekordów</button></div>
+      </div>
+      <div class="overlay hidden" id="pause-menu">
+        <div class="eyebrow">CHWILA NA ODDECH</div>
+        <h1>Silnik stygnie.</h1><button class="primary" id="resume">WRACAMY NA TOR</button><button class="text-button"
+          id="quit">Kończę ten bieg</button>
+      </div>
+    </section>
+    <section class="controls">
+      <p class="footnote">Prosta daje gaz, łuk wymaga wyczucia. Klawisze: G1 — spacja / ←, G2 — M, G3 — Q, G4 — P.</p>
+    </section>
+    <div class="corner-controls" id="corner-controls"><button class="race-control p1"
+        data-rider="0"><strong>G1</strong><span>START</span><small>ŻÓŁTY</small></button><button class="race-control p2"
+        data-rider="1"><strong>G2</strong><span>START</span><small>CZERWONY</small></button><button
+        class="race-control p3"
+        data-rider="2"><strong>G3</strong><span>START</span><small>NIEBIESKI</small></button><button
+        class="race-control p4" data-rider="3"><strong>G4</strong><span>START</span><small>BIAŁY</small></button></div>
+    <div id="race-status" class="race-status" role="list" aria-label="Zawodnicy biegu w kolejności jazdy"
+      aria-live="off"></div>
+  </main>
+  <dialog id="records-dialog">
+    <div class="records-head">
+      <div>
+        <div class="eyebrow">NAJSZYBSI NA TORZE</div>
+        <h2>Tablica rekordów</h2>
+      </div><button id="close-records" aria-label="Zamknij tabelę">×</button>
+    </div><label class="records-filter">Tor <select id="records-track"
+        aria-label="Tor w tabeli czasów"></select></label>
+    <p id="records-state">Sprawdzamy, kto rządzi na torze…</p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Zawodnik</th>
+            <th>Czas</th>
+            <th>Bieg</th>
+          </tr>
+        </thead>
+        <tbody id="records-body"></tbody>
+      </table>
+    </div><button class="text-button" id="reload-records">Odśwież wyniki</button>
+  </dialog>
+  <script src="tracks.js?v=17"></script>
+  <script src="gp-engine.js?v=17"></script>
+  <script src="gp-ui.js?v=17"></script>
+  <script src="online-race.js?v=17"></script>
+  <script src="online-smoothing.js?v=1"></script>
+  <script src="online-ui.js?v=17"></script>
+  <script src="game.js?v=17"></script>
+</body>
+
+</html>

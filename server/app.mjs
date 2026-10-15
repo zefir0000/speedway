@@ -6,7 +6,7 @@ import { createPool, migrate, repository } from './repository.mjs';
 import { connectRedis, RedisStore } from './redis-store.mjs';
 import { Realtime } from './realtime.mjs';
 import { tracks } from './engine.mjs';
-const files = new Set(['index.html', 'style.css', 'tracks.js', 'gp-engine.js', 'gp-ui.js', 'online-race.js', 'online-ws-ui.js', 'game.js']);
+const files = new Set(['index.html', 'style.css', 'tracks.js', 'gp-engine.js', 'gp-ui.js', 'online-race.js', 'online-smoothing.js', 'online-ws-ui.js', 'game.js']);
 const json = (res, status, value) => {
     res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
     res.end(JSON.stringify(value))

@@ -125,9 +125,9 @@ test('real Redis + MySQL + WebSocket + browser client races', { skip: process.en
                     connections.push(this)
                 }
             }
-            const c = { Date: Clock, crypto: crypto.webcrypto, console, AbortController, WebSocket: BrowserSocket, location: { protocol: 'http:', host: `127.0.0.1:${address.port}` }, document: { body: element(), getElementById: id => nodes[id] || (nodes[id] = element()), querySelectorAll: s => s === '[data-rider]' ? controls : [], createElement: element, createElementNS: element, addEventListener() {} }, window: { devicePixelRatio: 2, addEventListener() {} }, navigator: {}, localStorage: { getItem: () => null, setItem() {}, removeItem() {} }, sessionStorage: { getItem: k => storage.get(k) || null, setItem: (k, v) => storage.set(k, v), removeItem: k => storage.delete(k) }, ResizeObserver: class { observe() {} }, requestAnimationFrame() {}, setTimeout, clearTimeout, setInterval, clearInterval, fetch: (url, options = {}) => fetch(origin + url, {...options, headers: {...options.headers, cookie, origin } }) };
+            const c = { Date: Clock, performance: { now: () => now }, URLSearchParams, crypto: crypto.webcrypto, console, AbortController, WebSocket: BrowserSocket, location: { protocol: 'http:', host: `127.0.0.1:${address.port}`, search: '' }, document: { body: element(), getElementById: id => nodes[id] || (nodes[id] = element()), querySelectorAll: s => s === '[data-rider]' ? controls : [], createElement: element, createElementNS: element, addEventListener() {} }, window: { devicePixelRatio: 2, addEventListener() {} }, navigator: {}, localStorage: { getItem: () => null, setItem() {}, removeItem() {} }, sessionStorage: { getItem: k => storage.get(k) || null, setItem: (k, v) => storage.set(k, v), removeItem: k => storage.delete(k) }, ResizeObserver: class { observe() {} }, requestAnimationFrame() {}, setTimeout, clearTimeout, setInterval, clearInterval, fetch: (url, options = {}) => fetch(origin + url, {...options, headers: {...options.headers, cookie, origin } }) };
             vm.createContext(c);
-            for (const file of['tracks.js', 'gp-engine.js', 'gp-ui.js', 'online-race.js', 'online-ws-ui.js', 'game.js']) vm.runInContext(read('web/' + file), c);
+            for (const file of['tracks.js', 'gp-engine.js', 'gp-ui.js', 'online-race.js', 'online-smoothing.js', 'online-ws-ui.js', 'game.js']) vm.runInContext(read('web/' + file), c);
             vm.runInContext(`playerNames[0]='Phone ${i}';GPUI.setMode('online');OnlineUI.launch()`, c);
             clients.push({ c, nodes, controls, storage, cookie, connections });
         }
@@ -149,7 +149,7 @@ test('real Redis + MySQL + WebSocket + browser client races', { skip: process.en
         for (let frame = 0; frame < 60 * 150 && !clients.every(cl => vm.runInContext('state', cl.c) === 'result'); frame++) {
             now += 1000 / 60;
             if (frame % 60 === 0)
-                for (const cl of clients) { const ws = cl.connections.at(-1); if (ws ? .readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'ping', clientAt: now })) }
+                for (const cl of clients) { const ws = cl.connections.at(-1); if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'ping', clientAt: now })) }
             app.realtime.tick();
             if (frame % 3 === 0) app.realtime.broadcast();
             await settle();
