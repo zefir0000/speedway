@@ -7,7 +7,7 @@ const read=file=>readFileSync(new URL('../web/'+file,import.meta.url),'utf8');
 function harness(query){
  let time=1000,nextTimer=0;
  const sockets=[],timers=new Map(),nodes=new Map(),reports=[];
- const element=()=>({children:[],classList:{add(){},remove(){},toggle(){}},append(...children){this.children.push(...children)},replaceChildren(){},setAttribute(){},click(){}});
+ const element=()=>{const classes=new Set();return {children:[],classList:{add(name){classes.add(name)},remove(name){classes.delete(name)},contains:name=>classes.has(name),toggle(name,enabled){enabled?classes.add(name):classes.delete(name)}},append(...children){this.children.push(...children)},replaceChildren(){},setAttribute(){},click(){}}};
  const node=id=>{if(!nodes.has(id))nodes.set(id,element());return nodes.get(id)};
  const racers=()=>Array.from({length:4},(_,gate)=>({gate,x:gate*20,y:0,angle:0,poseLeg:0,poseDrift:0,started:true,finish:null,eliminated:false,auto:false,name:'Rider',speed:0,lap:1}));
  class WebSocket{
@@ -68,5 +68,28 @@ test('diagnostic report contains only numeric measurements, not session or rider
  assert.equal(report.variant,'smooth');
  assert.ok(report.measurements.frameMs.includes(16.7));
  assert.ok(!/aaaaaaaa|Tester|match|cookie|token|ticket/i.test(text));
+ ui.back();
+});
+
+test('ping quality uses green, orange and red ranges and resets when stale',async()=>{
+ const {ui,sockets,advance,context}=harness('');
+ ui.init();
+ assert.equal(ui.connectionQuality(),null);
+ assert.equal(context.$('online-ping-value').textContent,'PING · — ms');
+ ui.launch();await flush();
+ const socket=sockets[0];
+ for(const [latency,quality] of [[99,'good'],[100,'warn'],[199,'warn'],[200,'bad']]){
+  socket.deliver({type:'pong',clientAt:1000-latency,clientAtMono:1000-latency,serverNow:1000});
+  assert.equal(ui.connectionQuality(),quality,`${latency} ms`);
+  assert.equal(ui.connectionLabel(),`ONLINE · ${latency} ms`);
+  assert.equal(context.$('online-ping-value').textContent,`PING · ${latency} ms`);
+  assert.ok(context.$('online-ping-value').classList.contains('ping-'+quality));
+ }
+ advance(1501);
+ ui.render();
+ assert.equal(ui.connectionQuality(),null);
+ assert.equal(ui.connectionLabel(),'ŁĄCZENIE…');
+ assert.equal(context.$('online-ping-value').textContent,'PING · — ms');
+ assert.ok(!context.$('online-ping-value').classList.contains('ping-bad'));
  ui.back();
 });
