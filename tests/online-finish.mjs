@@ -15,6 +15,11 @@ const setTimer=(f,ms)=>{const id=++timerId;timers.set(id,{f,at:now+ms});return i
 const context={Date:Clock,crypto:crypto.webcrypto,console,AbortController,document:{body:element(),getElementById:id=>nodes[id]||(nodes[id]=element()),querySelectorAll:s=>s==='[data-rider]'?controls:[],createElement:element,createElementNS:element,addEventListener(){}},window:{devicePixelRatio:2,addEventListener(){}},navigator:{},localStorage:{getItem:()=>null,setItem(){}},sessionStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},ResizeObserver:class{observe(){}},requestAnimationFrame(){},setTimeout:setTimer,clearTimeout:id=>timers.delete(id),fetch(url,options={}){if(!url.startsWith('/api/online'))return Promise.resolve({ok:true,json:async()=>({scores:[]})});requests++;return new Promise((resolve,reject)=>{const cancel=()=>reject(Object.assign(Error('Aborted'),{name:'AbortError'}));options.signal?.addEventListener('abort',cancel,{once:true});setTimer(async()=>{if(options.signal?.aborted)return;const response=await online(new Request('https://speedway.test'+url,{...options,headers:{...options.headers,origin:'https://speedway.test'}}),{DB});setTimer(()=>{if(options.signal?.aborted)return;options.signal?.removeEventListener('abort',cancel);resolve(response)},40)},40)})}};
 vm.createContext(context);for(const file of ['tracks.js','gp-engine.js','gp-ui.js','online-race.js','online-ui.js','game.js'])vm.runInContext(read('web/'+file),context);
 assert.ok(nodes['menu-name-slot'].children.includes(nodes['name-fields']),'Quick mode keeps its name input beside player settings');
+assert.equal(nodes['name-fields'].children[0].children[0],'Gracz 1');
+assert.equal(nodes['name-fields'].children[0].children[2].textContent,'Klawisz: Spacja / ←');
+vm.runInContext("GPUI.setMode('gp')",context);
+assert.equal(nodes['name-fields'].children[0].children[0],'Twoje imię');
+assert.match(read('web/index.html'),/<strong id="time">[^<]+<\/strong><button[^>]+id="open-records">Tablica rekordów<\/button>/);
 vm.runInContext("playerNames[0]='Finish test';GPUI.setMode('online');OnlineUI.launch()",context);
 assert.ok(nodes['online-name-slot'].children.includes(nodes['name-fields']),'Online mode moves the same name input into its panel');
 assert.equal(nodes['name-fields'].children[0].children[0],'Twoje imię');

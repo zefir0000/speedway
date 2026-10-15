@@ -42,7 +42,7 @@
     <section class="hud" aria-label="Statystyki wyścigu">
       <div><small>OKRĄŻENIE</small><strong id="lap">— <em>/ 4</em></strong></div>
       <div><small>POZYCJA</small><strong id="place">— <em>/ 4</em></strong></div>
-      <div><small id="time-label">CZAS</small><strong id="time">00:00.0</strong></div>
+      <div><small id="time-label">CZAS</small><strong id="time">00:00.0</strong><button class="text-button records-shortcut" id="open-records">Tablica rekordów</button></div>
     </section>
     <section class="track-wrap"><canvas id="track"
         aria-label="Tor żużlowy z dwiema prostymi. Kolor przycisku odpowiada motocyklowi."></canvas>
@@ -64,18 +64,14 @@
       <div class="overlay" id="menu">
         <div class="eyebrow">CZTERY OKRĄŻENIA. JEDEN ZWYCIĘZCA.</div>
         <h1>Liczy się<br><span>każdy łuk.</span></h1>
-        <div class="mode-toolbar">
-          <div class="levels game-modes" aria-label="Tryb rozgrywki"><button data-mode="quick" class="selected"
-              aria-pressed="true">Szybki bieg</button><button data-mode="gp" aria-pressed="false">Grand
-              Prix</button><button data-mode="online" aria-pressed="false">Graj online</button></div>
-          <button class="text-button records-shortcut" id="open-records">Rekordy ↗</button>
-        </div>
+        <div class="levels game-modes" aria-label="Tryb rozgrywki"><button data-mode="quick" class="selected"
+            aria-pressed="true">Szybki bieg</button><button data-mode="gp" aria-pressed="false">Grand
+            Prix</button><button data-mode="online" aria-pressed="false">Graj online</button></div>
         <div class="setup-label quick-only">Ilu Was jedzie?</div>
         <div class="levels players quick-only" aria-label="Liczba graczy"><button data-players="1" class="selected"
             aria-pressed="true">1</button><button data-players="2" aria-pressed="false">2</button><button
             data-players="3" aria-pressed="false">3</button><button data-players="4" aria-pressed="false">4</button>
         </div>
-        <p class="quick-only quick-keys">Klawisze: G1 — spacja / ← · G2 — M · G3 — Q · G4 — P.</p>
         <div id="menu-name-slot"><div id="name-fields" class="name-fields"></div></div>
         <div class="setup-label quick-only">Wybierz arenę</div>
         <div id="track-options" class="track-options quick-only" aria-label="Wybór toru"></div>
@@ -195,11 +191,11 @@
       <p class="footnote">Prosta daje gaz, łuk wymaga wyczucia.</p>
     </section>
     <div class="corner-controls" id="corner-controls"><button class="race-control p1"
-        data-rider="0"><strong>G1</strong><span>START</span><small>ŻÓŁTY</small></button><button class="race-control p2"
-        data-rider="1"><strong>G2</strong><span>START</span><small>CZERWONY</small></button><button
+        data-rider="0"><strong>GRACZ 1</strong><span>START</span><small>ŻÓŁTY</small></button><button class="race-control p2"
+        data-rider="1"><strong>GRACZ 2</strong><span>START</span><small>CZERWONY</small></button><button
         class="race-control p3"
-        data-rider="2"><strong>G3</strong><span>START</span><small>NIEBIESKI</small></button><button
-        class="race-control p4" data-rider="3"><strong>G4</strong><span>START</span><small>BIAŁY</small></button></div>
+        data-rider="2"><strong>GRACZ 3</strong><span>START</span><small>NIEBIESKI</small></button><button
+        class="race-control p4" data-rider="3"><strong>GRACZ 4</strong><span>START</span><small>BIAŁY</small></button></div>
     <div id="race-status" class="race-status" role="list" aria-label="Zawodnicy biegu w kolejności jazdy"
       aria-live="off"></div>
   </main>
