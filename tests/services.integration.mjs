@@ -171,13 +171,13 @@ test('real Redis + MySQL + WebSocket + browser client races', { skip: process.en
         await assert.rejects(() => app.realtime.writeResults());
         sqlUnavailable = false;
         await app.realtime.writeResults();
-        const saved = await pool.query('SELECT id FROM online_matches WHERE id=?', [matchId]);
+        const [saved] = await pool.query('SELECT id FROM online_matches WHERE id=?', [matchId]);
         assert.equal(saved.length, 1);
-        assert.equal((await pool.query('SELECT gate FROM online_match_riders WHERE match_id=?', [matchId])).length, 4);
+        assert.equal((await pool.query('SELECT gate FROM online_match_riders WHERE match_id=?', [matchId]))[0].length, 4);
         // Idempotent replay from an outbox entry after lost acknowledgement.
         const result = { id: matchId, world: room.world, members: room.members.map(({ ownerId, gate }) => ({ ownerId, gate })), completedAt: now };
         await base.saveMatch(result);
-        assert.equal((await pool.query('SELECT gate FROM online_match_riders WHERE match_id=?', [matchId])).length, 4);
+        assert.equal((await pool.query('SELECT gate FROM online_match_riders WHERE match_id=?', [matchId]))[0].length, 4);
         const request = async(path, body, cookie = cookies[0]) => { const response = await fetch(origin + path, { method: body ? 'POST' : 'GET', headers: { cookie, origin, ...(body ? { 'content-type': 'application/json' } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) }); return { status: response.status, data: await response.json() } };
         const campaign = vm.runInContext(`GP.create(crypto.randomUUID(),'Kampania','easy',levels.easy.skill)`, clients[0].c);
         let response = await request('/api/campaign', { campaign, revision: 0 });
@@ -190,7 +190,9 @@ test('real Redis + MySQL + WebSocket + browser client races', { skip: process.en
         const score = { id: randomUUID(), name: 'Żółty', time_ms: 50000, level: 'easy', players: 1, track: 'classic' };
         await request('/api/scores', { scores: [score] });
         await request('/api/scores', { scores: [score] });
-        assert.equal((await pool.query('SELECT id FROM race_scores WHERE id=?', [score.id])).length, 1);
+        assert.equal((await pool.query('SELECT id FROM race_scores WHERE id=?', [score.id]))[0].length, 1);
+        const records = await request('/api/scores?track=classic');
+        assert.equal(records.data.scores.find(s => s.name === score.name)?.time_ms, score.time_ms);
         assert.equal((await request('/api/online/match', {})).status, 426);
         const intruder = await peer(origin, await getCookie());
         await assert.rejects(() => intruder.request('match', { matchId }), e => e.status === 403);

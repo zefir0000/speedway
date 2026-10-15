@@ -40,8 +40,8 @@
           aria-label="Pauza" disabled>Ⅱ</button><button id="fullscreen" aria-label="Pełny ekran">⛶</button></div>
     </header>
     <section class="hud" aria-label="Statystyki wyścigu">
-      <div><small>OKRĄŻENIE G1</small><strong id="lap">— <em>/ 4</em></strong></div>
-      <div><small>POZYCJA G1</small><strong id="place">— <em>/ 4</em></strong></div>
+      <div><small>OKRĄŻENIE</small><strong id="lap">— <em>/ 4</em></strong></div>
+      <div><small>POZYCJA</small><strong id="place">— <em>/ 4</em></strong></div>
       <div><small id="time-label">CZAS</small><strong id="time">00:00.0</strong></div>
     </section>
     <section class="track-wrap"><canvas id="track"
@@ -64,15 +64,19 @@
       <div class="overlay" id="menu">
         <div class="eyebrow">CZTERY OKRĄŻENIA. JEDEN ZWYCIĘZCA.</div>
         <h1>Liczy się<br><span>każdy łuk.</span></h1>
-        <div class="levels game-modes" aria-label="Tryb rozgrywki"><button data-mode="quick" class="selected"
-            aria-pressed="true">Szybki bieg</button><button data-mode="gp" aria-pressed="false">Grand
-            Prix</button><button data-mode="online" aria-pressed="false">Graj online</button></div>
+        <div class="mode-toolbar">
+          <div class="levels game-modes" aria-label="Tryb rozgrywki"><button data-mode="quick" class="selected"
+              aria-pressed="true">Szybki bieg</button><button data-mode="gp" aria-pressed="false">Grand
+              Prix</button><button data-mode="online" aria-pressed="false">Graj online</button></div>
+          <button class="text-button records-shortcut" id="open-records">Rekordy ↗</button>
+        </div>
         <div class="setup-label quick-only">Ilu Was jedzie?</div>
         <div class="levels players quick-only" aria-label="Liczba graczy"><button data-players="1" class="selected"
             aria-pressed="true">1</button><button data-players="2" aria-pressed="false">2</button><button
             data-players="3" aria-pressed="false">3</button><button data-players="4" aria-pressed="false">4</button>
         </div>
-        <div id="name-fields" class="name-fields"></div>
+        <p class="quick-only quick-keys">Klawisze: G1 — spacja / ← · G2 — M · G3 — Q · G4 — P.</p>
+        <div id="menu-name-slot"><div id="name-fields" class="name-fields"></div></div>
         <div class="setup-label quick-only">Wybierz arenę</div>
         <div id="track-options" class="track-options quick-only" aria-label="Wybór toru"></div>
         <p id="track-caption" class="track-caption quick-only"></p>
@@ -85,6 +89,7 @@
           <h2>Cztery miejsca. Jeden start.</h2>
           <p>Wspólna kolejka dla wszystkich. Pełna czwórka rusza od razu; po 20 sekundach wolne miejsca zajmują boty.
             Tor losujemy dla całego biegu.</p>
+          <div id="online-name-slot"></div>
           <div class="online-ping">
             <span id="online-ping-value">PING · — ms</span>
             <small id="online-ping-hint">Ping zmierzymy po rozpoczęciu szukania biegu.</small>
@@ -92,7 +97,7 @@
           <small class="online-ping-legend">Zielony: &lt;100 ms · pomarańczowy: 100–199 ms · czerwony: 200+ ms</small>
           <strong id="online-wait">Jedna kolejka. Cztery motocykle.</strong>
           <ul id="online-players"></ul>
-          <p id="online-status" role="status">Wpisz imię i wyszukaj bieg.</p><button id="online-cancel"
+          <p id="online-status" role="status">Wpisz imię powyżej i wyszukaj bieg.</p><button id="online-cancel"
             class="text-button hidden">Przerwij szukanie</button><small>Boty są oznaczone. Utrata połączenia oddaje
             motocykl botowi; możesz wrócić do biegu. Limit biegu online: 3 minuty.</small>
         </section>
@@ -154,8 +159,7 @@
           </details>
         </section>
         <p class="start-instruction">Czekaj na zgaśnięcie światła, potem kliknij START.<br>Kolejne przytrzymanie skręca.
-          Za wcześnie = falstart.</p><button class="primary" id="start">ODPAL BIEG</button><button class="text-button"
-          id="open-records">Tablica rekordów</button>
+          Za wcześnie = falstart.</p><button class="primary" id="start">ODPAL BIEG</button>
         <div class="best" id="best"></div>
       </div>
       <div class="overlay hidden" id="result" aria-live="polite">
@@ -188,7 +192,7 @@
       </div>
     </section>
     <section class="controls">
-      <p class="footnote">Prosta daje gaz, łuk wymaga wyczucia. Klawisze: G1 — spacja / ←, G2 — M, G3 — Q, G4 — P.</p>
+      <p class="footnote">Prosta daje gaz, łuk wymaga wyczucia.</p>
     </section>
     <div class="corner-controls" id="corner-controls"><button class="race-control p1"
         data-rider="0"><strong>G1</strong><span>START</span><small>ŻÓŁTY</small></button><button class="race-control p2"
